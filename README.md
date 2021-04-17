@@ -4,7 +4,7 @@ B2_PROJET_Dev_Log_YI_2021
 exemple jeu
 http://www.zebest-3000.com/jeux/jeu-20130.html
 
-pygame joysticks init
+pygame joysticks init pygame
 https://www.pygame.org/docs/ref/joystick.html
 
 https://yameb.blogspot.com/2013/01/gamepad-input-in-python.html
