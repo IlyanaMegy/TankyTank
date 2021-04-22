@@ -4,16 +4,21 @@ import random
 import pygame
 from pygame import mixer
 
-# soit (j1_x;j1_y) coordonnées j1
-# soit (j2_x;j2_y) coordonnées j2
-# soit (bulletX_j1;bulletY_j1) coordonées balle de tir depuis j1 vers j2
-# soit d coefficient directeur ligne de tir
+# soient (j1_x;j1_y) coordonnées j1
+#      (j2_x;j2_y) coordonnées j2
+#      (bulletX_j1;bulletY_j1) coordonées balle de tir depuis j1 vers j2
+#      a coefficient directeur ligne de tir
+#      b ordonnée à l'origine de la ligne de tir
+#      y l'équation de la droite (ligne de tir)
 
 # or:
-# init bulletX_j1 = j1_x , bulletY_j1 = j1_y
+# y = ax + b
+# a = (y2 - y1)/(x2 - x1)
+# b = y - ax
 
-# d = (y2 - y1)/(x2 - x1)
-# trouver valeur de bulletX pour bulletY -= 1
+# pour trouver valeur de bulletX pour bulletY -= 1 :
+# bulletY = ax + b
+# x = (bulletY - b) / a
 
 
 pygame.init()
