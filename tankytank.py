@@ -3,29 +3,13 @@ import random
 import pygame
 from pygame import mixer
 
-# soient :
-#      (j1_x;j1_y) coordonnées j1
-#      (j2_x;j2_y) coordonnées j2
-#      (bulletX_j1;bulletY_j1) coordonées balle de tir depuis j1 vers j2
-#      a coefficient directeur ligne de tir
-#      b ordonnée à l'origine de la ligne de tir
-#      y l'équation de la droite (ligne de tir)
-
-# or :
-# y = ax + b
-# a = (y2 - y1)/(x2 - x1)
-# b = y - ax
-
-# pour trouver valeur de bulletX pour bulletY -= 1 :
-# bulletY = ax + b
-# x = (bulletY - b) / a
-
-
 pygame.init()
 
 win = pygame.display.set_mode((900, 600))
 
 pygame.display.set_caption('Tanky Tanks')
+icon = pygame.image.load('j1_tank.png')
+pygame.display.set_icon(icon)
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -37,23 +21,23 @@ YELLOW = (255, 255, 255)
 win.fill(BLACK)
 pygame.display.flip()
 
-# init values
+# # Background
+# background = pygame.image.load('background.png')
 
 vel = 1
 run = True
 dim_tank = 20
+dir = "right"
 
-# player 1
-j1_x = 200
-j1_y = 200
-# j1 = pygame.image.load('usa.png')
+# Player 1
+j1_img = pygame.image.load('j1_tank.png').convert_alpha()
+j1_x = 250
+j1_y = 250
 
-# player 2
+# Player 2
+j2_img = pygame.image.load('j2_tank.png')
 j2_x = 500
-j2_y = 500
-# j2 = pygame.image.load('urss.png')
-
-coeff_d = (j2_y - j1_y)/(j2_x - j1_x)
+j2_y = 250
 
 # Bullet
 # Ready - You can't see the bullet on the win
@@ -62,6 +46,7 @@ bulletImg = pygame.image.load('bullet.png')
 bulletX = j1_x
 bulletY = j1_y
 bullet_state = "ready"
+
 
 # Score
 score_value = 0
@@ -72,11 +57,8 @@ testY = 10
 # Game Over
 over_font = pygame.font.Font('freesansbold.ttf', 64)
 
-def bullet_X_current(a, x, y, bulletY):
-    b = y - (a * x)
-    res = (bulletY - b) / a
-    return res
-
+def player(x, y):
+    win.blit(j1_img, (x, y))
 
 def show_score(x, y):
     score = font.render("Score : " + str(score_value), True, (255, 255, 255))
@@ -101,19 +83,18 @@ def isCollision(enemyX, enemyY, bulletX, bulletY):
     else:
         return False
 
-  
-# infinite loop 
-run = True
+
+ 
+# infinite loop
 while run:
-    
-    coeff_d = (j2_y - j1_y)/(j2_x - j1_x)
     pygame.time.delay(10)
+    print(dir)
 
     for event in pygame.event.get():
         if (event.type == pygame.QUIT):
             run = False
 
-    # stores keys pressed 
+     # stores keys pressed 
     keys = pygame.key.get_pressed()
       
     # if left arrow key is pressed
@@ -121,23 +102,27 @@ while run:
           
         # decrement in x co-ordinate
         j1_x -= vel
+        dir = "left"
           
     # if left arrow key is pressed
     if keys[pygame.K_RIGHT] and j1_x<900-dim_tank:
           
         # increment in x co-ordinate
         j1_x += vel
+        dir = "right"
          
     # if left arrow key is pressed   
     if keys[pygame.K_UP] and j1_y>0:
           
         # decrement in y co-ordinate
         j1_y -= vel
+        dir = "up"
           
     # if left arrow key is pressed   
     if keys[pygame.K_DOWN] and j1_y<600-dim_tank:
         # increment in y co-ordinate
         j1_y += vel
+        dir = "down"
 
     if keys[pygame.K_SPACE]:
         ##shoot that bullet
@@ -148,31 +133,16 @@ while run:
        
     win.fill((0, 0, 0))
 
-    # drawing object on win which is rectangle here 
-    j1 = pygame.draw.rect(win, RED, (j1_x, j1_y, dim_tank, dim_tank))
-    j2 = pygame.draw.rect(win, BLUE, (j2_x, j2_y, dim_tank, dim_tank))
-
-    gunline_x = j1_x + (dim_tank/2)
-    gunline_y = j1_y + (dim_tank/2)
-
-    # gun guideline
-    gunline = pygame.draw.line(win, BLUE, (120, 120), (gunline_x, gunline_y), width=3)
-    # canon = pygame.draw.line(gunline, GREEN, width=6)
-
-    # Bullet Movement
-    if bulletY <= 0:
-        bulletY = j1_y
-        bulletX = j1_x
-        bullet_state = "ready"
-
-    if bullet_state == "fire":
-        fire_bullet(bulletX, bulletY)
-        bulletY -= 4
-        bulletX = bullet_X_current(coeff_d, j2_x, j2_y, bulletY)
-        print(bulletX)
-
+    if dir == "left":
+        pygame.transform.rotate(j1_img, 40)
+        print("turn left")
+    elif dir =="down":
+        pygame.transform.rotate(j1_img, 56)
+    elif dir =="up":
+        pygame.transform.rotate(j1_img, 80)
+    else:
+        pygame.transform.rotate(j1_img, 160)
+    
+    player(j1_x, j1_y)
     show_score(textX, testY)
     pygame.display.update() 
-  
-# closes the pygame window 
-pygame.quit()
