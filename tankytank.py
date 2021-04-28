@@ -5,12 +5,6 @@ from pygame import mixer
 
 pygame.init()
 
-win = pygame.display.set_mode((900, 600))
-
-pygame.display.set_caption('Tanky Tanks')
-icon = pygame.image.load('j1_tank.png')
-pygame.display.set_icon(icon)
-
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -18,21 +12,40 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 255)
 
+win = pygame.display.set_mode((800, 700))
+pygame.display.set_caption('Tanky Tanks')
+icon = pygame.image.load('j1_tank.png')
+pygame.display.set_icon(icon)
+
+
+# Background
+background = pygame.image.load('map.png')
+margin_x = 20
+margin_y = 50
+# Walls
+dim_cube = 45
+
+# soit l'origine en haut à gauche de l'image --> rajouter le margin de l'image après
+walls = [[48,50,2],[139,5,2],[277,96,1],[322,5,3],[413,50,4],[459,95,1],[504,50,2],[139,141,2],[3,187,2],
+         [48,232,2],[277,187,1],[231,232,6],[367,232,1],[460,187,3],[505,187,1],[550,187,1],[94,278,1],
+         [139,278,5],[184,278,2],[413,323,1],[504,278,4],[3,368,1],[48,368,5],[413,413,1],[458,413,1],
+         [139,551,1],[413,506,2],[504,506,2],[458,551,1]]
+big_wall = [277,2,278,5]
+
 win.fill(BLACK)
 pygame.display.flip()
-
-# # Background
-# background = pygame.image.load('background.png')
 
 vel = 1
 run = True
 dim_tank = 20
-dir = "right"
+
+
 
 # Player 1
 j1_img = pygame.image.load('j1_tank.png').convert_alpha()
-j1_x = 250
-j1_y = 250
+j1_x = 118
+j1_y = 219
+dir = "right"
 
 # Player 2
 j2_img = pygame.image.load('j2_tank.png')
@@ -43,44 +56,47 @@ j2_y = 250
 # Ready - You can't see the bullet on the win
 # Fire - The bullet is currently moving
 bulletImg = pygame.image.load('bullet.png')
-bullet_start_x = j1_x+64
-bullet_start_y = j1_y+26
-bullet_state = "ready"
+bullet_j1_x = j1_x+50
+bullet_j1_y = j1_y+20.5
+bullet_j1_state = "ready"
 
 # Score
-score_value = 0
+score_value_j1 = 0
+score_value_j2 = 0
 font = pygame.font.Font('freesansbold.ttf', 32)
 textX = 10
 testY = 10
 
 # Game Over
-over_font = pygame.font.Font('freesansbold.ttf', 64)
+over_font = pygame.font.Font('freesansbold.ttf', 50)
 
 def bullet_dir_x(dir):
     if dir == "left":
-        bullet_start_x = j1_x
+        bullet_j1_x = j1_x
     elif dir =="down":
-        bullet_start_x = j1_x+26
+        bullet_j1_x = j1_x+20.5
     elif dir =="up":
-        bullet_start_x = j1_x+26
+        bullet_j1_x = j1_x+20.5
     else:
-        bullet_start_x = j1_x+64
-    return bullet_start_x
+        bullet_j1_x = j1_x+50
+    return bullet_j1_x
 
 
 def bullet_dir_y(dir):
     if dir == "left":
-        bullet_start_y = j1_y+26
+        bullet_j1_y = j1_y+20.5
     elif dir =="down":
-        bullet_start_y = j1_y+63
+        bullet_j1_y = j1_y+50
     elif dir =="up":
-        bullet_start_y = j1_y
+        bullet_j1_y = j1_y
     else:
-        bullet_start_y = j1_y+26
-    return bullet_start_y
+        bullet_j1_y = j1_y+20.5
+    return bullet_j1_y
 
 
-def player(x, y,dir):
+def player(x, y, dir):
+    # if isWall(x, y) == False :
+    print(dir, j1_x, j1_y)
     if dir == "left":
         win.blit(pygame.transform.rotate(j1_img, 180), (j1_x, j1_y))
     elif dir =="down":
@@ -89,35 +105,53 @@ def player(x, y,dir):
         win.blit(pygame.transform.rotate(j1_img, 90), (j1_x, j1_y))
     else:
         win.blit(pygame.transform.rotate(j1_img, 0), (j1_x, j1_y))
+    # else:
+    #     print("it's a wall here")
 
-def show_score(x, y):
+def show_score(x, y, score_value):
     score = font.render("Score : " + str(score_value), True, (255, 255, 255))
     win.blit(score, (x, y))
 
 
 def game_over_text():
-    over_text = over_font.render("GAME OVER", True, (255, 255, 255))
+    over_text = over_font.render("END OF THE GAME.", True, (255, 255, 255))
     win.blit(over_text, (200, 250))
 
 
 def fire_bullet(x, y):
-    global bullet_state
-    bullet_state = "fire"
+    global bullet_j1_state
+    bullet_j1_state = "fire"
     win.blit(bulletImg, (x,y))
 
 
-def isCollision(enemyX, enemyY, bullet_start_x, bullet_start_y):
-    distance = math.sqrt(math.pow(enemyX - bullet_start_x, 2) + (math.pow(enemyY - bullet_start_y, 2)))
+def isCollision(enemyX, enemyY, bullet_j1_x, bullet_j1_y):
+    distance = math.sqrt(math.pow(enemyX - bullet_j1_x, 2) + (math.pow(enemyY - bullet_j1_y, 2)))
     if distance < 27:
         return True
     else:
         return False
 
+# def isWall(x, y):
+#     for wall in walls:
+#         res = False
+#         if (wall[0]-5)<= x <= (wall[0]+65) and (wall[1]-5)<= y <= (wall[1]+(wall[2]*60+5)):
+#             res = True
+#             print(wall[0],wall[1])
+#             break
+#         elif (big_wall[0]-5)<= x <= (big_wall[0]+(big_wall[1]*60+5)) and (big_wall[1]-5)<= y <= (big_wall[2]+(big_wall[3]*60+5)):
+#             res = True
+#             print("big wall")
+#             break
+#         else:
+#             continue
+#     print(res)
+#     return res
 
  
 # infinite loop
 while run:
     pygame.time.delay(10) 
+    
     for event in pygame.event.get():
         if (event.type == pygame.QUIT):
             run = False
@@ -171,37 +205,49 @@ while run:
 
     if keys[pygame.K_SPACE]:
         ##shoot that bullet
-        if bullet_state == "ready":
+        if bullet_j1_state == "ready":
            bulletSound = mixer.Sound("one_shot_sound.wav")
            bulletSound.play()
-           fire_bullet(bullet_start_x, bullet_start_y)
+           fire_bullet(bullet_j1_x, bullet_j1_y)
            print("fire!")
        
     win.fill((0, 0, 0))
+    win.blit(background, (margin_x, margin_y))
 
-    if bullet_state == "fire":
-        fire_bullet(bullet_start_x, bullet_start_y)
+    # Collision
+    # j2_hasbeen_shot = isCollision(j2_x, j2_y, bullet_j1_x, bullet_j1_y)
+    # if j2_hasbeen_shot:
+    #     explosionSound = mixer.Sound("explosion.wav")
+    #     explosionSound.play()
+    #     bullet_j1_x = bullet_dir_x(dir)
+    #     bullet_j1_y = bullet_dir_y(dir)
+    #     bullet_j1_state = "ready"
+    #     score_value_j1 += 1
+
+    if bullet_j1_state == "fire":
+        fire_bullet(bullet_j1_x, bullet_j1_y)
         if dir == "right":
-            bullet_start_x += 4
+            bullet_j1_x += 4
         elif dir == "left":
-            bullet_start_x -= 4
+            bullet_j1_x -= 4
         elif dir == "up":
-            bullet_start_y -= 4
+            bullet_j1_y -= 4
         else:
-            bullet_start_y += 4
+            bullet_j1_y += 4
         
 
-    if bullet_start_y <= 0 or bullet_start_y >= 600:
-        bullet_state = "ready"
-        bullet_start_x = bullet_dir_x(dir)
-        bullet_start_y = bullet_dir_y(dir)
+    if bullet_j1_y <= 0 or bullet_j1_y >= 600:
+        bullet_j1_x = bullet_dir_x(dir)
+        bullet_j1_y = bullet_dir_y(dir)
+        bullet_j1_state = "ready"
 
-    if bullet_start_x <= 0 or bullet_start_x >= 900:
-        bullet_state = "ready"
-        bullet_start_x = bullet_dir_x(dir)
-        bullet_start_y = bullet_dir_y(dir)
+    if bullet_j1_x <= 0 or bullet_j1_x >= 900:
+        bullet_j1_x = bullet_dir_x(dir)
+        bullet_j1_y = bullet_dir_y(dir)
+        bullet_j1_state = "ready"
       
 
     player(j1_x,j1_y,dir)
-    show_score(textX, testY)
+    show_score(textX, testY,score_value_j1)
+    # show_score(textX, testY,score_value_j2)
     pygame.display.update() 
