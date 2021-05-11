@@ -69,7 +69,6 @@ def isWall(x, y):
         print("in wall")
         print(j1_x,j1_y)
         return True
-        
     else:
         return False
     
@@ -78,7 +77,7 @@ def isWall(x, y):
 # infinite loop
 while run:
     pygame.time.delay(10)
-    
+
     for event in pygame.event.get():
         if (event.type == pygame.QUIT):
             run = False

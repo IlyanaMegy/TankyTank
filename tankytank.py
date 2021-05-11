@@ -27,29 +27,28 @@ dim_cube = 46
 
 # soit l'origine en haut à gauche de l'image --> rajouter le margin de l'image après
 walls = [[48,50,2],[139,5,2],[277,96,1],[322,5,3],[413,50,4],[459,95,1],[504,50,2],[139,141,2],[3,187,2],
-         [48,232,2],[277,187,1],[231,232,6],[367,232,1],[460,187,3],[505,187,1],[550,187,1],[94,278,1],
+         [48,232,2],[277,187,1],[231,232,6],[460,187,3],[505,187,1],
          [139,278,5],[184,278,2],[413,323,1],[504,278,4],[3,368,1],[48,368,5],[413,413,1],[458,413,1],
          [139,551,1],[413,506,2],[504,506,2],[458,551,1]]
 big_wall = [277,2,278,5]
 
-for wall in walls:
-    print(wall[0], (wall[0] + dim_cube + 2))
-    print(wall[1], (wall[1]) + (wall[2] * dim_cube + 2))
-    
-    somewall = pygame.draw.rect(background, BLUE, (wall[0], wall[1], dim_cube+1, (dim_cube * wall[2])))
-    print(wall[0],wall[0]+dim_cube+1,wall[1],wall[1]+(dim_cube * wall[2]))
+
+# let's see those walls
+# for wall in walls:    
+#     somewall = pygame.draw.rect(background, BLUE, (wall[0], wall[1], dim_cube+1, (dim_cube * wall[2])))
+#     bigwall = pygame.draw.rect(background, RED, (big_wall[0], big_wall[2], (dim_cube * big_wall[1]), (dim_cube * big_wall[3])))
 
 win.fill(BLACK)
 pygame.display.flip()
 
 vel = 1
 run = True
-dim_tank = 40 
+dim_tank = 30
 
 # Player 1
 j1_img = pygame.image.load('j1_tank.png').convert_alpha()
-j1_x = 95
-j1_y = 130
+j1_x = 291
+j1_y = 568
 dir = "right"
 
 # Player 2
@@ -108,8 +107,6 @@ def player(x, y, dir):
             win.blit(pygame.transform.rotate(j1_img, 90), (j1_x, j1_y))
         elif dir =="right":
             win.blit(pygame.transform.rotate(j1_img, 0), (j1_x, j1_y))
-        else:
-            win.blit(j1_img, (x-1,y-1))
 
 def show_score(x, y, score_value):
     score = font.render("Score : " + str(score_value), True, (255, 255, 255))
@@ -135,29 +132,25 @@ def isCollision(enemyX, enemyY, bullet_j1_x, bullet_j1_y):
         return False
 
 def isWall(x, y):
-    # 2 pixels d'incertitude
-    # enlève dimension du tank
-    # for wall in walls:
-    #     res = False
+    for wall in walls:
+        res = False
+        if (wall[0] <= x <= (wall[0] + dim_cube)) and (wall[1] <= y <= (wall[1] + (wall[2] * dim_cube ))):
+            res = True
+            print("wall here")
+            print(wall[0], wall[1])
+            break 
+        elif (big_wall[0]<= x <= (big_wall[0] + (big_wall[1] * dim_cube))) and (big_wall[2]<= y <= (big_wall[2] + (big_wall[3] * dim_cube))):
+            res = True
+            break
+        else:
+            continue
+    return res
 
-    #     if ( wall[0] <= x <= (wall[0]) + dim_cube + 1) and (wall[1] <= y <= (wall[1] + (wall[2] * dim_cube ))):
-    #         res = True
-    #         print(wall[0], wall[0]+dim_cube+1, x, wall[1], y , wall[1]+(dim_cube * wall[2]))
-    #         break 
-    #     elif ((big_wall[0]) - 2)<= x <= ((big_wall[0]) + ((big_wall[1]) * dim_cube + 2)) and ((big_wall[1]) - 2)<= y <= (big_wall[2] + (big_wall[3] * dim_cube + 2)):
-    #         res = True
-    #         break
-    #     else:
-    #         continue
-    # return res
-    return True
-    
-
- 
 # infinite loop
 while run:
     pygame.time.delay(10)
-    print(dir)
+    print(j1_x,j1_y)
+
     for event in pygame.event.get():
         if (event.type == pygame.QUIT):
             run = False
@@ -166,77 +159,64 @@ while run:
     keys = pygame.key.get_pressed()
       
     # if left arrow key is pressed
-    if keys[pygame.K_LEFT] and j1_x>margin_x:
-        if keys[pygame.K_UP] and j1_y>margin_y:
-            continue
-        elif keys[pygame.K_DOWN] and j1_y<600-dim_tank:
-            continue
-        elif isWall(j1_x, j1_y):
-            j1_x+=vel
-            dir = "left"
+    if keys[pygame.K_LEFT] and j1_x>0:
+        j1_x_new = j1_x - vel
+        if isWall(j1_x_new, j1_y):
             continue
         else:
-          # decrement in x co-ordinate
-            j1_x -= vel
+            # decrement in x co-ordinate
+            j1_x = j1_x_new
             dir = "left"
+            player(j1_x,j1_y,dir)
+            
 
     # if left arrow key is pressed
     if keys[pygame.K_RIGHT] and j1_x<600-dim_tank:
-        if keys[pygame.K_UP] and j1_y>margin_y:
-            continue
-        elif keys[pygame.K_DOWN] and j1_y<600-dim_tank:
-            continue
-        elif isWall(j1_x, j1_y):
-            j1_x-=vel
-            dir="right"
+        j1_x_new = j1_x + vel
+        x = j1_x_new + dim_tank
+        if isWall(x, j1_y):
             continue
         else:
             # increment in x co-ordinate
-            j1_x += vel
+            j1_x = j1_x_new
             dir = "right"
+            player(j1_x,j1_y,dir)
          
     # if left arrow key is pressed   
-    if keys[pygame.K_UP] and j1_y>margin_y:
-        if keys[pygame.K_RIGHT] and j1_x<600-dim_tank:
-            continue
-        elif keys[pygame.K_LEFT] and j1_x>margin_x:
-            continue
-        elif isWall(j1_x, j1_y):
-            # step back
-            j1_y+=vel
-            dir="up"
+    if keys[pygame.K_UP] and j1_y>0:
+        j1_y_new = j1_y - vel
+        if isWall(j1_x, j1_y_new):
             continue
         else:
             # decrement in y co-ordinate
-            j1_y -= vel
+            j1_y = j1_y_new
             dir = "up"
+            player(j1_x, j1_y, dir)
             
     # if left arrow key is pressed   
     if keys[pygame.K_DOWN] and j1_y<600-dim_tank:
-        if keys[pygame.K_RIGHT] and j1_x<600-dim_tank:
-            continue
-        elif keys[pygame.K_LEFT] and j1_x>margin_x:
-            continue
-        elif isWall(j1_x, j1_y):
-            j1_y-=vel
-            dir="down"
+        j1_y_new = j1_y + vel
+        y = j1_y_new + dim_tank
+        if isWall(j1_x, y):
             continue
         else:
             # increment in y co-ordinate
-            j1_y += vel
+            j1_y = j1_y_new
             dir = "down"
-
-    if keys[pygame.K_SPACE]:
-        ##shoot that bullet
-        if bullet_j1_state == "ready":
-           bulletSound = mixer.Sound("one_shot_sound.wav")
-           bulletSound.play()
-           fire_bullet(bullet_j1_x, bullet_j1_y)
-           print("fire!")
+            player(j1_x, j1_y, dir)
+       
+    # if keys[pygame.K_SPACE]:
+    #     ##shoot that bullet
+    #     if bullet_j1_state == "ready":
+    #        bulletSound = mixer.Sound("one_shot_sound.wav")
+    #        bulletSound.play()
+    #        fire_bullet(bullet_j1_x, bullet_j1_y)
+    #        print("fire!")
        
     win.fill((0, 0, 0))
+    
     win.blit(background, (margin_x, margin_y))
-
+    player(j1_x, j1_y, dir)
     # Collision
     # j2_hasbeen_shot = isCollision(j2_x, j2_y, bullet_j1_x, bullet_j1_y)
     # if j2_hasbeen_shot:
@@ -269,8 +249,6 @@ while run:
         bullet_j1_y = bullet_dir_y(dir)
         bullet_j1_state = "ready"
       
-
-    player(j1_x,j1_y,dir)
     show_score(textX, testY,score_value_j1)
     # show_score(textX, testY,score_value_j2)
     pygame.display.update() 
