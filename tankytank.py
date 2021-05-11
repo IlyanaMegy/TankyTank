@@ -12,7 +12,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 255)
 
-win = pygame.display.set_mode((800, 700))
+win = pygame.display.set_mode((600, 600))
 pygame.display.set_caption('Tanky Tanks')
 icon = pygame.image.load('j1_tank.png')
 pygame.display.set_icon(icon)
@@ -20,10 +20,10 @@ pygame.display.set_icon(icon)
 
 # Background
 background = pygame.image.load('map.png')
-margin_x = 20
-margin_y = 50
+margin_x = 0
+margin_y = 0
 # Walls
-dim_cube = 45
+dim_cube = 46
 
 # soit l'origine en haut à gauche de l'image --> rajouter le margin de l'image après
 walls = [[48,50,2],[139,5,2],[277,96,1],[322,5,3],[413,50,4],[459,95,1],[504,50,2],[139,141,2],[3,187,2],
@@ -32,19 +32,24 @@ walls = [[48,50,2],[139,5,2],[277,96,1],[322,5,3],[413,50,4],[459,95,1],[504,50,
          [139,551,1],[413,506,2],[504,506,2],[458,551,1]]
 big_wall = [277,2,278,5]
 
+for wall in walls:
+    print(wall[0], (wall[0] + dim_cube + 2))
+    print(wall[1], (wall[1]) + (wall[2] * dim_cube + 2))
+    
+    somewall = pygame.draw.rect(background, BLUE, (wall[0], wall[1], dim_cube+1, (dim_cube * wall[2])))
+    print(wall[0],wall[0]+dim_cube+1,wall[1],wall[1]+(dim_cube * wall[2]))
+
 win.fill(BLACK)
 pygame.display.flip()
 
 vel = 1
 run = True
-dim_tank = 20
-
-
+dim_tank = 40 
 
 # Player 1
 j1_img = pygame.image.load('j1_tank.png').convert_alpha()
-j1_x = 118
-j1_y = 219
+j1_x = 95
+j1_y = 130
 dir = "right"
 
 # Player 2
@@ -95,18 +100,16 @@ def bullet_dir_y(dir):
 
 
 def player(x, y, dir):
-    # if isWall(x, y) == False :
-    print(dir, j1_x, j1_y)
-    if dir == "left":
-        win.blit(pygame.transform.rotate(j1_img, 180), (j1_x, j1_y))
-    elif dir =="down":
-        win.blit(pygame.transform.rotate(j1_img, 270), (j1_x, j1_y))
-    elif dir =="up":
-        win.blit(pygame.transform.rotate(j1_img, 90), (j1_x, j1_y))
-    else:
-        win.blit(pygame.transform.rotate(j1_img, 0), (j1_x, j1_y))
-    # else:
-    #     print("it's a wall here")
+        if dir == "left":
+            win.blit(pygame.transform.rotate(j1_img, 180), (j1_x, j1_y))
+        elif dir =="down":
+            win.blit(pygame.transform.rotate(j1_img, 270), (j1_x, j1_y))
+        elif dir =="up":
+            win.blit(pygame.transform.rotate(j1_img, 90), (j1_x, j1_y))
+        elif dir =="right":
+            win.blit(pygame.transform.rotate(j1_img, 0), (j1_x, j1_y))
+        else:
+            win.blit(j1_img, (x-1,y-1))
 
 def show_score(x, y, score_value):
     score = font.render("Score : " + str(score_value), True, (255, 255, 255))
@@ -131,27 +134,30 @@ def isCollision(enemyX, enemyY, bullet_j1_x, bullet_j1_y):
     else:
         return False
 
-# def isWall(x, y):
-#     for wall in walls:
-#         res = False
-#         if (wall[0]-5)<= x <= (wall[0]+65) and (wall[1]-5)<= y <= (wall[1]+(wall[2]*60+5)):
-#             res = True
-#             print(wall[0],wall[1])
-#             break
-#         elif (big_wall[0]-5)<= x <= (big_wall[0]+(big_wall[1]*60+5)) and (big_wall[1]-5)<= y <= (big_wall[2]+(big_wall[3]*60+5)):
-#             res = True
-#             print("big wall")
-#             break
-#         else:
-#             continue
-#     print(res)
-#     return res
+def isWall(x, y):
+    # 2 pixels d'incertitude
+    # enlève dimension du tank
+    # for wall in walls:
+    #     res = False
+
+    #     if ( wall[0] <= x <= (wall[0]) + dim_cube + 1) and (wall[1] <= y <= (wall[1] + (wall[2] * dim_cube ))):
+    #         res = True
+    #         print(wall[0], wall[0]+dim_cube+1, x, wall[1], y , wall[1]+(dim_cube * wall[2]))
+    #         break 
+    #     elif ((big_wall[0]) - 2)<= x <= ((big_wall[0]) + ((big_wall[1]) * dim_cube + 2)) and ((big_wall[1]) - 2)<= y <= (big_wall[2] + (big_wall[3] * dim_cube + 2)):
+    #         res = True
+    #         break
+    #     else:
+    #         continue
+    # return res
+    return True
+    
 
  
 # infinite loop
 while run:
-    pygame.time.delay(10) 
-    
+    pygame.time.delay(10)
+    print(dir)
     for event in pygame.event.get():
         if (event.type == pygame.QUIT):
             run = False
@@ -160,21 +166,29 @@ while run:
     keys = pygame.key.get_pressed()
       
     # if left arrow key is pressed
-    if keys[pygame.K_LEFT] and j1_x>0:
-        if keys[pygame.K_UP] and j1_y>0:
+    if keys[pygame.K_LEFT] and j1_x>margin_x:
+        if keys[pygame.K_UP] and j1_y>margin_y:
             continue
         elif keys[pygame.K_DOWN] and j1_y<600-dim_tank:
+            continue
+        elif isWall(j1_x, j1_y):
+            j1_x+=vel
+            dir = "left"
             continue
         else:
-            # decrement in x co-ordinate
+          # decrement in x co-ordinate
             j1_x -= vel
             dir = "left"
-          
+
     # if left arrow key is pressed
-    if keys[pygame.K_RIGHT] and j1_x<900-dim_tank:
-        if keys[pygame.K_UP] and j1_y>0:
+    if keys[pygame.K_RIGHT] and j1_x<600-dim_tank:
+        if keys[pygame.K_UP] and j1_y>margin_y:
             continue
         elif keys[pygame.K_DOWN] and j1_y<600-dim_tank:
+            continue
+        elif isWall(j1_x, j1_y):
+            j1_x-=vel
+            dir="right"
             continue
         else:
             # increment in x co-ordinate
@@ -182,10 +196,15 @@ while run:
             dir = "right"
          
     # if left arrow key is pressed   
-    if keys[pygame.K_UP] and j1_y>0:
-        if keys[pygame.K_RIGHT] and j1_x<900-dim_tank:
+    if keys[pygame.K_UP] and j1_y>margin_y:
+        if keys[pygame.K_RIGHT] and j1_x<600-dim_tank:
             continue
-        elif keys[pygame.K_LEFT] and j1_x>0:
+        elif keys[pygame.K_LEFT] and j1_x>margin_x:
+            continue
+        elif isWall(j1_x, j1_y):
+            # step back
+            j1_y+=vel
+            dir="up"
             continue
         else:
             # decrement in y co-ordinate
@@ -194,9 +213,13 @@ while run:
             
     # if left arrow key is pressed   
     if keys[pygame.K_DOWN] and j1_y<600-dim_tank:
-        if keys[pygame.K_RIGHT] and j1_x<900-dim_tank:
+        if keys[pygame.K_RIGHT] and j1_x<600-dim_tank:
             continue
-        elif keys[pygame.K_LEFT] and j1_x>0:
+        elif keys[pygame.K_LEFT] and j1_x>margin_x:
+            continue
+        elif isWall(j1_x, j1_y):
+            j1_y-=vel
+            dir="down"
             continue
         else:
             # increment in y co-ordinate
