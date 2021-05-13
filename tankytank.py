@@ -46,25 +46,33 @@ vel = 1.2
 run = True
 dim_tank = 33
 
+
 # Player 1
 j1_img = pygame.image.load('j1_tank.png').convert_alpha()
 j1_x = 291
 j1_y = 568
 dir_j1 = "right"
 
+
 # Player 2
 j2_img = pygame.image.load('j2_tank.png').convert_alpha()
 j2_x = 237
 j2_y = 51
-dir_j2 = "right"
+dir_j2 = "up"
+
 
 # Bullet
 # Ready - You can't see the bullet on the win
 # Fire - The bullet is currently moving
-bulletImg = pygame.image.load('bullet.png')
-bullet_j1_x = j1_x+50
-bullet_j1_y = j1_y+20.5
+bullet_j1_x = j1_x + dim_tank 
+bullet_j1_y = j1_y + (dim_tank/2)
 bullet_j1_state = "ready"
+
+bullet_j2_x = j2_x
+bullet_j2_y = j2_y
+bullet_j2_state = "ready"
+bullet_j1 =  pygame.draw.circle(win, WHITE, (bullet_j1_x,bullet_j1_y), 5, 10)
+
 
 # Score
 score_value_j1 = 0
@@ -76,29 +84,30 @@ testY = 10
 # Game Over
 over_font = pygame.font.Font('freesansbold.ttf', 50)
 
+def fire_bullet(x, y):
+    pygame.draw.circle(win, WHITE, (bullet_j1_x,bullet_j1_y), 3, 10)
+
 def bullet_dir_x(dir):
     if dir == "left":
         bullet_j1_x = j1_x
     elif dir =="down":
-        bullet_j1_x = j1_x+20.5
+        bullet_j1_x = j1_x + (dim_tank/2)
     elif dir =="up":
-        bullet_j1_x = j1_x+20.5
+        bullet_j1_x = j1_x + (dim_tank/2)
     else:
-        bullet_j1_x = j1_x+50
+        bullet_j1_x = j1_x + dim_tank
     return bullet_j1_x
-
 
 def bullet_dir_y(dir):
     if dir == "left":
-        bullet_j1_y = j1_y+20.5
+        bullet_j1_y = j1_y + (dim_tank/2)
     elif dir =="down":
-        bullet_j1_y = j1_y+50
+        bullet_j1_y = j1_y + dim_tank
     elif dir =="up":
         bullet_j1_y = j1_y
     else:
-        bullet_j1_y = j1_y+20.5
+        bullet_j1_y = j1_y + (dim_tank/2)
     return bullet_j1_y
-
 
 def player(x, y, dir, img):
         if dir == "left":
@@ -114,17 +123,9 @@ def show_score(x, y, score_value):
     score = font.render("Score : " + str(score_value), True, (255, 255, 255))
     win.blit(score, (x, y))
 
-
 def game_over_text():
     over_text = over_font.render("END OF THE GAME.", True, (255, 255, 255))
     win.blit(over_text, (200, 250))
-
-
-def fire_bullet(x, y):
-    global bullet_j1_state
-    bullet_j1_state = "fire"
-    win.blit(bulletImg, (x,y))
-
 
 def isCollision(enemyX, enemyY, bullet_j1_x, bullet_j1_y):
     distance = math.sqrt(math.pow(enemyX - bullet_j1_x, 2) + (math.pow(enemyY - bullet_j1_y, 2)))
@@ -138,8 +139,6 @@ def isWall(x, y):
         res = False
         if (wall[0] <= x <= (wall[0] + dim_cube)) and (wall[1] <= y <= (wall[1] + (wall[2] * dim_cube ))):
             res = True
-            print("wall here")
-            print(wall[0], wall[1])
             break 
         elif (big_wall[0]<= x <= (big_wall[0] + (big_wall[1] * dim_cube))) and (big_wall[2]<= y <= (big_wall[2] + (big_wall[3] * dim_cube))):
             res = True
@@ -147,6 +146,12 @@ def isWall(x, y):
         else:
             continue
     return res
+
+
+#################################################################################################################################
+####################################################          GAME            ###################################################
+#################################################################################################################################
+
 
 # infinite loop
 while run:
@@ -224,15 +229,21 @@ while run:
             j1_y = j1_y_new
             dir_j1 = "down"
             player(j1_x, j1_y, dir_j1, j1_img)
-                  
-    #################################################################################################################################
 
-    
+    if keys[pygame.K_SPACE]:
+        # shoot that bullet
+        if bullet_j1_state == "ready":
+           bulletSound = mixer.Sound("one_shot_sound.wav")
+           bulletSound.play()
+           bullet_j1_state = "fire"
+           fire_bullet(bullet_j1_x, bullet_j1_y)
+           old_dir_j1 = dir_j1
+
+
     #################################################################################################################################
     #################################################           PLAYER 2            #################################################
     #################################################################################################################################
 
-       
     # if left arrow key is pressed
     if keys[pygame.K_q] and j2_x>0:
         j2_x_new = j2_x - vel
@@ -294,17 +305,17 @@ while run:
             dir_j2 = "down"
             player(j2_x, j2_y, dir_j2, j2_img)
 
+    if keys[pygame.K_a]:
+        # shoot that bullet
+        if bullet_j2_state == "ready":  #try to remove that condition later
+           bulletSound = mixer.Sound("one_shot_sound.wav")
+           bulletSound.play()
+           fire_bullet(bullet_j2_x, bullet_j2_y)
+           old_dir_j2 = dir_j2
+
     ##################################################################################################################################
     
 
-    if keys[pygame.K_SPACE]:
-        # shoot that bullet
-        if bullet_j1_state == "ready":
-           bulletSound = mixer.Sound("one_shot_sound.wav")
-           bulletSound.play()
-           fire_bullet(bullet_j1_x, bullet_j1_y)
-           print("fire!")
-       
     win.fill((0, 0, 0))
     win.blit(background, (margin_x, margin_y))
     player(j1_x, j1_y, dir_j1, j1_img)
@@ -323,24 +334,38 @@ while run:
 
     if bullet_j1_state == "fire":
         fire_bullet(bullet_j1_x, bullet_j1_y)
-        if dir == "right":
+        if old_dir_j1 == "right":
             bullet_j1_x += 4
-        elif dir == "left":
+        elif old_dir_j1 == "left":
             bullet_j1_x -= 4
-        elif dir == "up":
+        elif old_dir_j1 == "up":
             bullet_j1_y -= 4
         else:
             bullet_j1_y += 4
-        
 
+    if bullet_j2_state == "fire":
+        fire_bullet(bullet_j2_x, bullet_j2_y)
+        if old_dir_j2 == "right":
+            bullet_j2_x += 4
+        elif old_dir_j2 == "left":
+            bullet_j2_x -= 4
+        elif old_dir_j2 == "up":
+            bullet_j2_y -= 4
+        else:
+            bullet_j2_y += 4
+        
+    ## Collision
+    ## Reset bullet data
     if bullet_j1_y <= 0 or bullet_j1_y >= 600:
-        bullet_j1_x = bullet_dir_x(dir)
-        bullet_j1_y = bullet_dir_y(dir)
+        print("reset 1")
+        bullet_j1_x = bullet_dir_x(dir_j1)
+        bullet_j1_y = bullet_dir_y(dir_j1)
         bullet_j1_state = "ready"
 
-    if bullet_j1_x <= 0 or bullet_j1_x >= 900:
-        bullet_j1_x = bullet_dir_x(dir)
-        bullet_j1_y = bullet_dir_y(dir)
+    if bullet_j1_x <= 0 or bullet_j1_x >= 600:
+        print("reset")
+        bullet_j1_x = bullet_dir_x(dir_j1)
+        bullet_j1_y = bullet_dir_y(dir_j1)
         bullet_j1_state = "ready"
       
     show_score(textX, testY,score_value_j1)
