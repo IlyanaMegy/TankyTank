@@ -22,6 +22,7 @@ pygame.display.set_icon(icon)
 background = pygame.image.load('map.png')
 margin_x = 0
 margin_y = 0
+
 # Walls
 dim_cube = 46
 
@@ -41,20 +42,21 @@ big_wall = [277,2,278,5]
 win.fill(BLACK)
 pygame.display.flip()
 
-vel = 1
+vel = 1.2
 run = True
-dim_tank = 30
+dim_tank = 33
 
 # Player 1
 j1_img = pygame.image.load('j1_tank.png').convert_alpha()
 j1_x = 291
 j1_y = 568
-dir = "right"
+dir_j1 = "right"
 
 # Player 2
-j2_img = pygame.image.load('j2_tank.png')
-j2_x = 500
-j2_y = 250
+j2_img = pygame.image.load('j2_tank.png').convert_alpha()
+j2_x = 237
+j2_y = 51
+dir_j2 = "right"
 
 # Bullet
 # Ready - You can't see the bullet on the win
@@ -98,15 +100,15 @@ def bullet_dir_y(dir):
     return bullet_j1_y
 
 
-def player(x, y, dir):
+def player(x, y, dir, img):
         if dir == "left":
-            win.blit(pygame.transform.rotate(j1_img, 180), (j1_x, j1_y))
+            win.blit(pygame.transform.rotate(img, 180), (x, y))
         elif dir =="down":
-            win.blit(pygame.transform.rotate(j1_img, 270), (j1_x, j1_y))
+            win.blit(pygame.transform.rotate(img, 270), (x, y))
         elif dir =="up":
-            win.blit(pygame.transform.rotate(j1_img, 90), (j1_x, j1_y))
+            win.blit(pygame.transform.rotate(img, 90), (x, y))
         elif dir =="right":
-            win.blit(pygame.transform.rotate(j1_img, 0), (j1_x, j1_y))
+            win.blit(pygame.transform.rotate(img, 0), (x, y))
 
 def show_score(x, y, score_value):
     score = font.render("Score : " + str(score_value), True, (255, 255, 255))
@@ -149,26 +151,32 @@ def isWall(x, y):
 # infinite loop
 while run:
     pygame.time.delay(10)
-    print(j1_x,j1_y)
 
     for event in pygame.event.get():
         if (event.type == pygame.QUIT):
             run = False
-
      # stores keys pressed 
     keys = pygame.key.get_pressed()
-      
+
+    
+    #################################################################################################################################
+    #################################################           PLAYER 1            #################################################
+    #################################################################################################################################
+
     # if left arrow key is pressed
     if keys[pygame.K_LEFT] and j1_x>0:
         j1_x_new = j1_x - vel
         if isWall(j1_x_new, j1_y):
             continue
+        elif keys[pygame.K_DOWN]:
+            continue
+        elif keys[pygame.K_UP]:
+            continue
         else:
             # decrement in x co-ordinate
             j1_x = j1_x_new
-            dir = "left"
-            player(j1_x,j1_y,dir)
-            
+            dir_j1 = "left"
+            player(j1_x,j1_y,dir_j1,j1_img)
 
     # if left arrow key is pressed
     if keys[pygame.K_RIGHT] and j1_x<600-dim_tank:
@@ -176,22 +184,30 @@ while run:
         x = j1_x_new + dim_tank
         if isWall(x, j1_y):
             continue
+        elif keys[pygame.K_DOWN]:
+            continue
+        elif keys[pygame.K_UP]:
+            continue
         else:
             # increment in x co-ordinate
             j1_x = j1_x_new
-            dir = "right"
-            player(j1_x,j1_y,dir)
+            dir_j1 = "right"
+            player(j1_x,j1_y,dir_j1,j1_img)
          
     # if left arrow key is pressed   
     if keys[pygame.K_UP] and j1_y>0:
         j1_y_new = j1_y - vel
         if isWall(j1_x, j1_y_new):
             continue
+        elif keys[pygame.K_LEFT]:
+            continue
+        elif keys[pygame.K_RIGHT]:
+            continue
         else:
             # decrement in y co-ordinate
             j1_y = j1_y_new
-            dir = "up"
-            player(j1_x, j1_y, dir)
+            dir_j1 = "up"
+            player(j1_x, j1_y, dir_j1, j1_img)
             
     # if left arrow key is pressed   
     if keys[pygame.K_DOWN] and j1_y<600-dim_tank:
@@ -199,24 +215,102 @@ while run:
         y = j1_y_new + dim_tank
         if isWall(j1_x, y):
             continue
+        elif keys[pygame.K_LEFT]:
+            continue
+        elif keys[pygame.K_RIGHT]:
+            continue
         else:
             # increment in y co-ordinate
             j1_y = j1_y_new
-            dir = "down"
-            player(j1_x, j1_y, dir)
+            dir_j1 = "down"
+            player(j1_x, j1_y, dir_j1, j1_img)
+                  
+    #################################################################################################################################
+
+    
+    #################################################################################################################################
+    #################################################           PLAYER 2            #################################################
+    #################################################################################################################################
+
        
-    # if keys[pygame.K_SPACE]:
-    #     ##shoot that bullet
-    #     if bullet_j1_state == "ready":
-    #        bulletSound = mixer.Sound("one_shot_sound.wav")
-    #        bulletSound.play()
-    #        fire_bullet(bullet_j1_x, bullet_j1_y)
-    #        print("fire!")
+    # if left arrow key is pressed
+    if keys[pygame.K_q] and j2_x>0:
+        j2_x_new = j2_x - vel
+        if isWall(j2_x_new, j2_y):
+            continue
+        elif keys[pygame.K_z]:
+            continue
+        elif keys[pygame.K_s]:
+            continue
+        else:
+            # decrement in x co-ordinate
+            j2_x = j2_x_new
+            dir_j2 = "left"
+            player(j2_x,j2_y,dir_j2,j2_img)
+
+    # if left arrow key is pressed
+    if keys[pygame.K_d] and j2_x<600-dim_tank:
+        j2_x_new = j2_x + vel
+        x = j2_x_new + dim_tank
+        if isWall(x, j2_y):
+            continue
+        elif keys[pygame.K_z]:
+            continue
+        elif keys[pygame.K_s]:
+            continue
+        else:
+            # increment in x co-ordinate
+            j2_x = j2_x_new
+            dir_j2 = "right"
+            player(j2_x,j2_y,dir_j2,j2_img)
+         
+    # if left arrow key is pressed   
+    if keys[pygame.K_z] and j2_y>0:
+        j2_y_new = j2_y - vel
+        if isWall(j2_x, j2_y_new):
+            continue
+        elif keys[pygame.K_d]:
+            continue
+        elif keys[pygame.K_q]:
+            continue
+        else:
+            # decrement in y co-ordinate
+            j2_y = j2_y_new
+            dir_j2 = "up"
+            player(j2_x, j2_y, dir_j2, j2_img)
+              
+    if keys[pygame.K_s] and j2_y<600-dim_tank:
+        j2_y_new = j2_y + vel
+        y = j2_y_new + dim_tank
+        if isWall(j2_x, y):
+            continue
+        elif keys[pygame.K_d]:
+            continue
+        elif keys[pygame.K_q]:
+            continue
+        else:
+            # increment in y co-ordinate
+            j2_y = j2_y_new
+            dir_j2 = "down"
+            player(j2_x, j2_y, dir_j2, j2_img)
+
+    ##################################################################################################################################
+    
+
+    if keys[pygame.K_SPACE]:
+        # shoot that bullet
+        if bullet_j1_state == "ready":
+           bulletSound = mixer.Sound("one_shot_sound.wav")
+           bulletSound.play()
+           fire_bullet(bullet_j1_x, bullet_j1_y)
+           print("fire!")
        
     win.fill((0, 0, 0))
-    
     win.blit(background, (margin_x, margin_y))
-    player(j1_x, j1_y, dir)
+    player(j1_x, j1_y, dir_j1, j1_img)
+    player(j2_x, j2_y, dir_j2, j2_img)
+
+
     # Collision
     # j2_hasbeen_shot = isCollision(j2_x, j2_y, bullet_j1_x, bullet_j1_y)
     # if j2_hasbeen_shot:
