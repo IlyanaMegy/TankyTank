@@ -1,3 +1,8 @@
+x = 450
+y = 50
+import os
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
+
 import math
 import pygame
 from pygame import mixer
@@ -11,7 +16,7 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 255)
 
-win = pygame.display.set_mode((600, 600))
+win = pygame.display.set_mode((600, 450))
 pygame.display.set_caption('Tanky Tanks')
 icon = pygame.image.load('j1_tank.png')
 pygame.display.set_icon(icon)
@@ -23,7 +28,8 @@ margin_x = 0
 margin_y = 0
 
 # Font
-font = pygame.font.SysFont(None, 20)
+font = pygame.font.Font("8-Bit-Madness.ttf", 50)
+font_sub = pygame.font.Font("8-Bit-Madness.ttf", 35)
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
     textrect = textobj.get_rect()
@@ -46,7 +52,6 @@ big_wall = [277,2,278,5]
 #     somewall = pygame.draw.rect(background, BLUE, (wall[0], wall[1], dim_cube+1, (dim_cube * wall[2])))
 #     bigwall = pygame.draw.rect(background, RED, (big_wall[0], big_wall[2], (dim_cube * big_wall[1]), (dim_cube * big_wall[3])))
 
-win.fill(BLACK)
 pygame.display.flip()
 
 
@@ -54,21 +59,37 @@ click = False
 def main_menu():
     while True:
  
-        win.fill((0,0,0))
-        draw_text('main menu', font, (255, 255, 255), win, 20, 20)
+        win.fill(BLACK)
+        draw_text('TANKY TANK', font, RED, win, 180, 40)
  
         mx, my = pygame.mouse.get_pos()
  
-        button_1 = pygame.Rect(50, 100, 200, 50)
-        button_2 = pygame.Rect(50, 200, 200, 50)
+        #button_1 = pygame.draw(win, BLUE, [180,150,255,50])
+        button_1 = pygame.Rect(183, 155, 220, 45)
+        button_2 = pygame.Rect(183, 305, 220, 45)
+
+        pygame.draw.rect(win, RED, [180,150,225,3])
+        pygame.draw.rect(win, RED, [180,200,225,3])
+        pygame.draw.rect(win, RED, [180,150,3,50])
+        pygame.draw.rect(win, RED, [405,150,3,53])
+
+        pygame.draw.rect(win, RED, [180,300,225,3])
+        pygame.draw.rect(win, RED, [180,350,225,3])
+        pygame.draw.rect(win, RED, [180,300,3,50])
+        pygame.draw.rect(win, RED, [405,300,3,53])
+
         if button_1.collidepoint((mx, my)):
             if click:
                 game()
         if button_2.collidepoint((mx, my)):
             if click:
                 options()
-        pygame.draw.rect(win, (255, 0, 0), button_1)
-        pygame.draw.rect(win, (255, 0, 0), button_2)
+
+        startGame = font_sub.render('hello', True, BLUE)
+        pygame.draw.rect(win, BLACK, button_1)
+        pygame.draw.rect(win, BLACK, button_2)
+        win.blit(startGame, (20, 20))
+        
  
         click = False
         for event in pygame.event.get():
@@ -89,7 +110,7 @@ def main_menu():
 #################################################################################################################################
 
 def game():
-
+    win = pygame.display.set_mode((600, 600))
     vel = 1.2
     run = True
     dim_tank = 33
@@ -217,6 +238,7 @@ def game():
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
                 run = False
+                win = pygame.display.set_mode((600, 450))
         # stores keys pressed 
         keys = pygame.key.get_pressed()
 
