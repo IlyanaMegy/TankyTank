@@ -343,22 +343,15 @@ while run:
     bullet_j2_y = bullet_dir_y(dir_j2, j2_y)
 
 
-    # Collision
-    # j2_hasbeen_shot = isCollision(j2_x, j2_y, bullet_j1_x, bullet_j1_y)
-    # if j2_hasbeen_shot:
-    #     explosionSound = mixer.Sound("explosion.wav")
-    #     explosionSound.play()
-    #     bullet_j1_x = bullet_dir_x(dir)
-    #     bullet_j1_y = bullet_dir_y(dir)
-    #     bullet_j1_state = "ready"
-    #     score_value_j1 += 1
-
     ## Collision
     ## Reset bullet data
     if old_bullet_j1_y <= 0 or old_bullet_j1_y >= 600:
         bullet_j1_state = "ready"
 
     if old_bullet_j1_x <= 0 or old_bullet_j1_x >= 600:
+        bullet_j1_state = "ready"
+
+    if isWall(old_bullet_j1_x,old_bullet_j1_y):
         bullet_j1_state = "ready"
 
     if bullet_j1_state == "fire":
@@ -380,6 +373,9 @@ while run:
 
     if old_bullet_j2_x <= 0 or old_bullet_j2_x >= 600:
         bullet_j2_state = "ready"
+    
+    if isWall(old_bullet_j2_x,old_bullet_j2_y):
+        bullet_j2_state = "ready"
 
     if bullet_j2_state == "fire":
         print("is on fire")
@@ -395,6 +391,17 @@ while run:
         else:
             old_bullet_j2_y += 4
         
+
+
+    # j2_hasbeen_shot = isCollision(j2_x, j2_y, bullet_j1_x, bullet_j1_y)
+    # if j2_hasbeen_shot:
+    #     explosionSound = mixer.Sound("explosion.wav")
+    #     explosionSound.play()
+    #     bullet_j1_x = bullet_dir_x(dir)
+    #     bullet_j1_y = bullet_dir_y(dir)
+    #     bullet_j1_state = "ready"
+    #     score_value_j1 += 1
+
     
     show_score(textX, testY,score_value_j1)
     # show_score(textX, testY,score_value_j2)
