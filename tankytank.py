@@ -1,12 +1,12 @@
-x = 450
-y = 50
+score_file = open("score.txt",'at')
 import os
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
-
-import math
+from pygame.time import delay
 import pygame
 from pygame import mixer
 
+x = 450
+y = 50
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (x,y)
 pygame.init()
 
 WHITE = (255, 255, 255)
@@ -30,6 +30,7 @@ margin_y = 0
 # Font
 font = pygame.font.Font("8-Bit-Madness.ttf", 50)
 font_sub = pygame.font.Font("8-Bit-Madness.ttf", 35)
+font_text = pygame.font.Font("8-Bit-Madness.ttf", 24)
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
     textrect = textobj.get_rect()
@@ -53,20 +54,19 @@ big_wall = [277,2,278,5]
 #     bigwall = pygame.draw.rect(background, RED, (big_wall[0], big_wall[2], (dim_cube * big_wall[1]), (dim_cube * big_wall[3])))
 
 pygame.display.flip()
-
-
 click = False
+
 def main_menu():
+    click = False
+    win = pygame.display.set_mode((600, 450))
     while True:
  
         win.fill(BLACK)
         draw_text('TANKY TANK', font, RED, win, 180, 40)
  
         mx, my = pygame.mouse.get_pos()
- 
-        #button_1 = pygame.draw(win, BLUE, [180,150,255,50])
-        button_1 = pygame.Rect(183, 155, 220, 45)
-        button_2 = pygame.Rect(183, 305, 220, 45)
+        startGame_button = pygame.Rect(183, 155, 220, 45)
+        score_button = pygame.Rect(183, 305, 220, 45)
 
         pygame.draw.rect(win, RED, [180,150,225,3])
         pygame.draw.rect(win, RED, [180,200,225,3])
@@ -78,20 +78,20 @@ def main_menu():
         pygame.draw.rect(win, RED, [180,300,3,50])
         pygame.draw.rect(win, RED, [405,300,3,53])
 
-        if button_1.collidepoint((mx, my)):
+        if startGame_button.collidepoint((mx, my)):
             if click:
                 game()
-        if button_2.collidepoint((mx, my)):
+        if score_button.collidepoint((mx, my)):
             if click:
                 options()
 
-        startGame = font_sub.render('hello', True, BLUE)
-        pygame.draw.rect(win, BLACK, button_1)
-        pygame.draw.rect(win, BLACK, button_2)
-        win.blit(startGame, (20, 20))
+        startGame = font_sub.render('START GAME', True, WHITE)
+        scorePage = font_sub.render('VIEW SCORE', True, WHITE)
+        pygame.draw.rect(win, BLACK, startGame_button)
+        pygame.draw.rect(win, BLACK, score_button)
+        win.blit(startGame, (210, 165))
+        win.blit(scorePage, (210, 315))
         
- 
-        click = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -105,12 +105,8 @@ def main_menu():
         pygame.display.update()
         mainClock.tick(60)
 
-#################################################################################################################################
-####################################################          GAME            ###################################################
-#################################################################################################################################
-
 def game():
-    win = pygame.display.set_mode((600, 600))
+    win = pygame.display.set_mode((800, 600))
     vel = 1.2
     run = True
     dim_tank = 33
@@ -143,18 +139,13 @@ def game():
     old_bullet_j2_y = j2_y
     bullet_j2_state = "ready"
 
-    bullet_j1 =  pygame.draw.circle(win, WHITE, (bullet_j1_x,bullet_j1_y), 5, 10)
-    bullet_j2 =  pygame.draw.circle(win, YELLOW, (bullet_j1_x,bullet_j1_y), 5, 10)
-
     # Score
     score_value_j1 = 0
     score_value_j2 = 0
-    font = pygame.font.Font('freesansbold.ttf', 32)
-    textX = 10
-    testY = 10
-
-    # Game Over
-    over_font = pygame.font.Font('freesansbold.ttf', 50)
+    font = pygame.font.Font('8-Bit-Madness.ttf', 32)
+    score_x = 650
+    score_j1_y = 40
+    score_j2_y = 90
 
     def fire_bullet_j1(x, y):
         pygame.draw.circle(win, YELLOW, (x,y), 3, 10)
@@ -198,17 +189,6 @@ def game():
         score = font.render("Score : " + str(score_value), True, (255, 255, 255))
         win.blit(score, (x, y))
 
-    def game_over_text():
-        over_text = over_font.render("END OF THE GAME.", True, (255, 255, 255))
-        win.blit(over_text, (200, 250))
-
-    def isCollision(enemyX, enemyY, bullet_j1_x, bullet_j1_y):
-        distance = math.sqrt(math.pow(enemyX - bullet_j1_x, 2) + (math.pow(enemyY - bullet_j1_y, 2)))
-        if distance < 27:
-            return True
-        else:
-            return False
-
     def isWall(x, y):
         for wall in walls:
             res = False
@@ -225,24 +205,21 @@ def game():
     def touchedEnemy(bullet_x, bullet_y, enemy_x, enemy_y):
         res = False
         if (enemy_x <= bullet_x <= enemy_x + 33) and (enemy_y <= bullet_y <= enemy_y + 33):
+            print(enemy_x ,"<=" ,bullet_x ,"<=" ,(enemy_x + 33))
+            print((enemy_y ,"<=" ,bullet_y ,"<=" ,(enemy_y + 33)))
             res = True
-            print("touched enemy !")
         return res
-
-    run = True
+    start_ticks=pygame.time.get_ticks() #starter tick
     # infinite loop
     while run:
-        pygame.time.delay(10)
-        print(score_value_j1, score_value_j2)
+        seconds=(pygame.time.get_ticks()-start_ticks)/1000 #calculate how many seconds
 
         for event in pygame.event.get():
             if (event.type == pygame.QUIT):
                 run = False
-                win = pygame.display.set_mode((600, 450))
         # stores keys pressed 
         keys = pygame.key.get_pressed()
 
-        
         #################################################################################################################################
         #################################################           PLAYER 1            #################################################
         #################################################################################################################################
@@ -412,16 +389,14 @@ def game():
         bullet_j2_x = bullet_dir_x(dir_j2, j2_x)
         bullet_j2_y = bullet_dir_y(dir_j2, j2_y)
 
-        if bullet_j1_state == "ready":
-            old_bullet_j1_x = bullet_j1_x
-            old_bullet_j1_y = bullet_j1_y
+        if touchedEnemy(old_bullet_j1_x,old_bullet_j1_y, j2_x, j2_y):
+            score_value_j1 += 1
+            bullet_j1_state = "ready"
 
-        if bullet_j2_state == "ready":
-            old_bullet_j2_x = bullet_j2_x
-            old_bullet_j2_y = bullet_j2_y
+        if touchedEnemy(old_bullet_j2_x,old_bullet_j2_y, j1_x, j1_y):
+            bullet_j2_state = "ready"
+            score_value_j2 += 1
 
-        ## Collision
-        ## Reset bullet data
         if old_bullet_j1_y <= 0 or old_bullet_j1_y >= 600:
             bullet_j1_state = "ready"
 
@@ -431,9 +406,14 @@ def game():
         if isWall(old_bullet_j1_x,old_bullet_j1_y):
             bullet_j1_state = "ready"
 
-        if touchedEnemy(old_bullet_j1_x,old_bullet_j1_y, j2_x, j2_y):
-            score_value_j1 += 1
-            bullet_j2_state = "ready"
+
+        if bullet_j1_state == "ready":
+            old_bullet_j1_x = bullet_j1_x
+            old_bullet_j1_y = bullet_j1_y
+
+        if bullet_j2_state == "ready":
+            old_bullet_j2_x = bullet_j2_x
+            old_bullet_j2_y = bullet_j2_y
 
         if bullet_j1_state == "fire":
             fire_bullet_j1(old_bullet_j1_x, old_bullet_j1_y)
@@ -446,9 +426,6 @@ def game():
             else:
                 old_bullet_j1_y += 4
 
-
-
-
         if old_bullet_j2_y <= 0 or old_bullet_j2_y >= 600:
             bullet_j2_state = "ready"
 
@@ -457,10 +434,7 @@ def game():
         
         if isWall(old_bullet_j2_x,old_bullet_j2_y):
             bullet_j2_state = "ready"
-
-        if touchedEnemy(old_bullet_j2_x,old_bullet_j2_y, j1_x, j1_y):
-            score_value_j2 += 1
-            bullet_j2_state = "ready"
+            
 
         if bullet_j2_state == "fire":
             fire_bullet_j2(old_bullet_j2_x, old_bullet_j2_y)
@@ -473,25 +447,106 @@ def game():
             else:
                 old_bullet_j2_y += 4
         
-        show_score(textX, testY,score_value_j1)
-        # show_score(textX, testY,score_value_j2)
+        win.blit(j1_img, (605, 35))
+        show_score(score_x, score_j1_y,score_value_j1)
+        win.blit(j2_img, (605, 85))
+        show_score(score_x, score_j2_y,score_value_j2)
+
+        if score_value_j1 == 3 or score_value_j2 == 3:
+            score_file.write(str(score_value_j1))
+            score_file.write(str(score_value_j2))
+            score_file.write(str(seconds))
+            score_file.close()
+            end_game()
+
         pygame.display.update() 
 
-
 def options():
+    click = False
     run = True
     while run:
         win.fill((0,0,0))
- 
-        draw_text('options', font, (255, 255, 255), win, 20, 20)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     run = False
-        
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        mx, my = pygame.mouse.get_pos()
+        return_button = pygame.Rect(20, 20, 220, 45)
+
+        if return_button.collidepoint((mx, my)):
+            if click:
+                main_menu()
+
+        return_mp = font_text.render('< Return main page', True, WHITE)
+        pygame.draw.rect(win, BLACK, return_button)
+        win.blit(return_mp, (20,20))
+
         pygame.display.update()
         mainClock.tick(60)
  
+
+def end_game():
+    click = False
+    win = pygame.display.set_mode((600, 450))
+    while True:
+ 
+        win.fill(BLACK)
+        draw_text('GAME OVER', font, RED, win, 180, 40)
+        draw_text('score', font_sub, RED, win, 200, 100)
+
+
+        score_file = open("score.txt",'rt')
+        score = score_file.read()
+        #draw_text(score, font_text, WHITE, win, 180, 150)
+        print(score)
+
+ 
+        mx, my = pygame.mouse.get_pos()
+        newGame_button = pygame.Rect(153, 383, 97, 37)
+        mainPage_button = pygame.Rect(353, 383, 97, 37)
+
+        pygame.draw.rect(win, RED, [150,380,100,3])
+        pygame.draw.rect(win, RED, [150,420,100,3])
+        pygame.draw.rect(win, RED, [150,380,3,40])
+        pygame.draw.rect(win, RED, [250,380,3,43])
+
+        pygame.draw.rect(win, RED, [350,380,100,3])
+        pygame.draw.rect(win, RED, [350,420,100,3])
+        pygame.draw.rect(win, RED, [350,380,3,40])
+        pygame.draw.rect(win, RED, [450,380,3,43])
+
+        if newGame_button.collidepoint((mx, my)):
+            if click:
+                game()
+        if mainPage_button.collidepoint((mx, my)):
+            if click:
+                main_menu()
+
+        newGame = font_text.render('NEW GAME', True, WHITE)
+        mainPage = font_text.render('MAIN PAGE', True, WHITE)
+        pygame.draw.rect(win, BLACK, newGame_button)
+        pygame.draw.rect(win, BLACK, mainPage_button)
+        win.blit(newGame, (155, 390))
+        win.blit(mainPage, (353, 390))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pygame.quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+ 
+       
+        pygame.display.update()
+        mainClock.tick(60)
+
 main_menu()
