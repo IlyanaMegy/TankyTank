@@ -152,15 +152,19 @@ class Game:
                     else:
                         self.player.move(3)
 
+            if keys[pygame.K_SPACE]:
+                print(self.player.img)
+                (self.canvas.get_canvas()).blit(pygame.transform.rotate(self.player.img, 40), (self.player.x, self.player.y))
+
             # Send Network Stuff
             self.player2.x, self.player2.y = self.parse_data(self.send_data())
 
             # Update Canvas
             self.canvas.draw_background()
             self.player.draw(self.canvas.get_canvas())
-            self.player.rotate(self.canvas.get_canvas())
+            # self.player.rotate(self.canvas.get_canvas())
             self.player2.draw(self.canvas.get_canvas())
-            self.player2.rotate(self.canvas.get_canvas())
+            # self.player2.rotate(self.canvas.get_canvas())
             self.canvas.update()
 
             print(self.player.olddir, " to " ,self.player.dir)
