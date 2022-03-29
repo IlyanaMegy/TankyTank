@@ -50,26 +50,23 @@ class Player():
         self.dir = dir
         self.olddir = dir
         self.img = img
+        print(self.dir)
 
     def draw(self, g):
-        # pygame.draw.rect(g, self.color ,(self.x, self.y, self.width, self.height))
-        # pygame.draw.rect(g, WHITE, (self.x+15,self.y, 3, 15))
-
-        g.blit(self.img, (self.x, self.y))
-        
-    def rotate(self, g):        
-        if self.olddir != "left" and self.dir == "left":
+        if self.dir == "left":
             print("turn left!")
-            pygame.transform.rotate(self.img, 180)
-        elif self.olddir != "down" and self.dir == "down":
+            g.blit(pygame.transform.rotate(self.img, 180), (self.x, self.y))
+            print(self.dir)
+        elif self.dir == "down":
             print("turn down!")
-            pygame.transform.rotate(self.img, 270)
-        elif self.olddir != "up" and self.dir == "up":
+            g.blit(pygame.transform.rotate(self.img, 270), (self.x, self.y))
+        elif self.dir == "up":
             print("turn up!")
-            pygame.transform.rotate(g, 90)   
-        elif self.olddir != "right" and self.dir == "right":
+            g.blit(pygame.transform.rotate(self.img, 90), (self.x, self.y))  
+        elif self.dir == "right":
             print("turn right!")
-            pygame.transform.rotate(g, 0)
+            g.blit(pygame.transform.rotate(self.img, 0), (self.x, self.y))
+        
 
     def move(self, dirn):
         """
@@ -96,8 +93,6 @@ class Player():
             self.dir = "down"       
         
 
-    
-
 class Game:
 
     def __init__(self, w, h):
@@ -105,7 +100,7 @@ class Game:
         self.width = w
         self.height = h
         self.player = Player(291, 568, (255,0,0), "right", pygame.image.load("j1_tank.png"))
-        self.player2 = Player(400,180, (0,255,0), "top", pygame.image.load("j2_tank.png"))
+        self.player2 = Player(400,180, (0,255,0), "up", pygame.image.load("j2_tank.png"))
         self.canvas = Canvas(self.width, self.height, "Tanky Tank")
         self.background = pygame.image.load('map.png')
 
@@ -114,6 +109,7 @@ class Game:
     def run(self):
         clock = pygame.time.Clock()
         run = True
+        g = self.canvas.get_canvas()
         while run:
             clock.tick(60)
 
@@ -153,22 +149,19 @@ class Game:
                         self.player.move(3)
 
             if keys[pygame.K_SPACE]:
-                print(self.player.img)
-                (self.canvas.get_canvas()).blit(pygame.transform.rotate(self.player.img, 40), (self.player.x, self.player.y))
+                continue
+                
 
             # Send Network Stuff
             self.player2.x, self.player2.y = self.parse_data(self.send_data())
 
             # Update Canvas
             self.canvas.draw_background()
-            self.player.draw(self.canvas.get_canvas())
-            # self.player.rotate(self.canvas.get_canvas())
-            self.player2.draw(self.canvas.get_canvas())
-            # self.player2.rotate(self.canvas.get_canvas())
+            self.player.draw(g)
+            self.player2.draw(g)
             self.canvas.update()
 
-            print(self.player.olddir, " to " ,self.player.dir)
-
+            # print(self.player.olddir, " to " ,self.player.dir)
         pygame.quit()
 
     def send_data(self):
@@ -176,15 +169,17 @@ class Game:
         Send position to server
         :return: None
         """
-        data = str(self.net.id) + ":" + str(self.player.x) + "," + str(self.player.y)
+        data = str(self.net.id) + ":" + str(self.player.x) + "," + str(self.player.y) + "," + str(self.player.dir)
+        print(data)
         reply = self.net.send(data)
         return reply
+        
 
     @staticmethod
     def parse_data(data):
         try:
             d = data.split(":")[1].split(",")
-            return int(d[0]), int(d[1])
+            return int(d[0]), int(d[1]), int(d[2])
         except:
             return 0,0
 
