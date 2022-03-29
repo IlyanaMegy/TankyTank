@@ -85,7 +85,17 @@ class Player():
 
     def bullet(self, g):
         print("fire !")
-        pygame.draw.circle(g, YELLOW, (self.x +14.5, self.y -5), 3, 10)
+        if self.dir == "left":
+            pygame.draw.circle(g, RED, (self.x - 3, self.y + 14.5), 3, 10)
+        
+        elif self.dir =="right":
+            pygame.draw.circle(g, YELLOW, (self.x + 35, self.y + 14.5), 3, 10)
+
+        elif self.dir == "up" :
+            pygame.draw.circle(g, RED, (self.x +14.5, self.y -3), 3, 10)
+        else:
+            pygame.draw.circle(g, YELLOW, (self.x + 14.5, self.y +35), 3, 10)
+        
 
         
 
