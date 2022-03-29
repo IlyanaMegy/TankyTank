@@ -39,32 +39,23 @@ def isWall(x, y):
 
 class Player():
     width = height = 33
-    
-
-
-    def __init__(self, startx, starty, color, dir, img):
+    def __init__(self, startx, starty, dir, img):
         self.x = startx
         self.y = starty
         self.velocity = 1.8
-        # self.color = color
         self.dir = dir
         self.olddir = dir
         self.img = img
-        print(self.dir)
+        
 
     def draw(self, g):
         if self.dir == "left":
-            print("turn left!")
             g.blit(pygame.transform.rotate(self.img, 180), (self.x, self.y))
-            print(self.dir)
         elif self.dir == "down":
-            print("turn down!")
             g.blit(pygame.transform.rotate(self.img, 270), (self.x, self.y))
         elif self.dir == "up":
-            print("turn up!")
-            g.blit(pygame.transform.rotate(self.img, 90), (self.x, self.y))  
+            g.blit(pygame.transform.rotate(self.img, 90), (self.x, self.y))
         elif self.dir == "right":
-            print("turn right!")
             g.blit(pygame.transform.rotate(self.img, 0), (self.x, self.y))
         
 
@@ -90,7 +81,12 @@ class Player():
         else:
             self.y += self.velocity
             self.olddir = self.dir
-            self.dir = "down"       
+            self.dir = "down"
+
+    def bullet(self, g):
+        print("fire !")
+        pygame.draw.circle(g, YELLOW, (self.x +14.5, self.y -5), 3, 10)
+
         
 
 class Game:
@@ -99,8 +95,8 @@ class Game:
         self.net = Network()
         self.width = w
         self.height = h
-        self.player = Player(291, 568, (255,0,0), "right", pygame.image.load("j1_tank.png"))
-        self.player2 = Player(400,180, (0,255,0), "up", pygame.image.load("j2_tank.png"))
+        self.player = Player(291, 568, "right", pygame.image.load("j1_tank.png"))
+        self.player2 = Player(400,180, "up", pygame.image.load("j2_tank.png"))
         self.canvas = Canvas(self.width, self.height, "Tanky Tank")
         self.background = pygame.image.load('map.png')
 
@@ -110,6 +106,7 @@ class Game:
         clock = pygame.time.Clock()
         run = True
         g = self.canvas.get_canvas()
+        bullet_state = "ready"
         while run:
             clock.tick(60)
 
@@ -149,7 +146,7 @@ class Game:
                         self.player.move(3)
 
             if keys[pygame.K_SPACE]:
-                continue
+                bullet_state = "fire"
                 
 
             # Send Network Stuff
@@ -159,9 +156,12 @@ class Game:
             self.canvas.draw_background()
             self.player.draw(g)
             self.player2.draw(g)
-            self.canvas.update()
 
-            # print(self.player.olddir, " to " ,self.player.dir)
+            if bullet_state == "fire":
+                self.player.bullet(g)
+
+            self.canvas.update()
+            
         pygame.quit()
 
     def send_data(self):
@@ -170,7 +170,6 @@ class Game:
         :return: None
         """
         data = str(self.net.id) + ":" + str(self.player.x) + "," + str(self.player.y) + "," + str(self.player.dir)
-        print(data)
         reply = self.net.send(data)
         return reply
         
