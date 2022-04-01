@@ -48,6 +48,8 @@ class Player():
         self.img = img
         self.bullet_x = 0
         self.bullet_y = 0
+        self.bullet_y_old = 0
+        self.bullet_x_old = 0
         self.bullet_state = "ready"
 
     def draw(self, g):
@@ -93,16 +95,18 @@ class Player():
             self.bullet_x = self.x + 14.5
             self.bullet_y = self.y +35
 
-    def bullet(self, g):
-        
+    def shootBullet(self, x, y, g):
+        pygame.draw.circle(g, RED, (x, y), 3, 10)
+
+    def bullet(self,g):
         while self.bullet_state == "fire":
             if isWall(self.bullet_x, self.bullet_y) == False:
-                pygame.draw.circle(g, RED, (self.bullet_x, self.bullet_y), 3, 10)
-                if self.dir == "left":
+                self.shootBullet(self.bullet_x_old, self.bullet_y_old, g)
+                if self.olddir == "left":
                     self.bullet_x -= 4
-                elif self.dir == "right":
+                elif self.olddir == "right":
                     self.bullet_x +=4
-                elif self.dir == "up":
+                elif self.olddir == "up":
                     self.bullet_y -= 4
                 else:
                     self.bullet_y += 4
@@ -171,7 +175,11 @@ class Game:
                         self.player.move(3)
 
             if keys[pygame.K_SPACE]:
-                self.player.bullet_state = "fire"
+                if self.player.bullet_state == "ready":
+                    self.player.bullet_state = "fire"
+                    # bulletSound = mixer.Sound("one_shot_sound.wav")
+                    # bulletSound.play()
+                    self.player.shootBullet(self.player.bullet_x, self.player.bullet_y, g)
                 
 
             # Send Network Stuff
@@ -183,6 +191,8 @@ class Game:
             self.player2.draw(g)
 
             self.player.bullet(g)
+            self.player.bullet_x_old = self.player.bullet_x
+            self.player.bullet_y_old = self.player.bullet_y
 
             self.canvas.update()
             
