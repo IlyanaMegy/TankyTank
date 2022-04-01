@@ -46,7 +46,9 @@ class Player():
         self.dir = dir
         self.olddir = dir
         self.img = img
-        
+        self.bullet_x = 0
+        self.bullet_y = 0
+        self.bullet_state = "ready"
 
     def draw(self, g):
         if self.dir == "left":
@@ -69,36 +71,49 @@ class Player():
             self.x += self.velocity
             self.olddir = self.dir
             self.dir = "right"
+            self.bullet_x = self.x + 35
+            self.bullet_y = self.y + 14.5
 
         elif dirn == 1:
             self.x -= self.velocity
             self.olddir = self.dir
             self.dir =  "left"
+            self.bullet_x = self.x - 3
+            self.bullet_y = self.y + 14.5
         elif dirn == 2:
             self.y -= self.velocity
             self.olddir = self.dir
             self.dir = "up"
+            self.bullet_x = self.x +14.5
+            self.bullet_y = self.y -3
         else:
             self.y += self.velocity
             self.olddir = self.dir
             self.dir = "down"
+            self.bullet_x = self.x + 14.5
+            self.bullet_y = self.y +35
 
     def bullet(self, g):
-        print("fire !")
-        if self.dir == "left":
-            pygame.draw.circle(g, RED, (self.x - 3, self.y + 14.5), 3, 10)
         
-        elif self.dir =="right":
-            pygame.draw.circle(g, YELLOW, (self.x + 35, self.y + 14.5), 3, 10)
-
-        elif self.dir == "up" :
-            pygame.draw.circle(g, RED, (self.x +14.5, self.y -3), 3, 10)
-        else:
-            pygame.draw.circle(g, YELLOW, (self.x + 14.5, self.y +35), 3, 10)
+        while self.bullet_state == "fire":
+            if isWall(self.bullet_x, self.bullet_y) == False:
+                pygame.draw.circle(g, RED, (self.bullet_x, self.bullet_y), 3, 10)
+                if self.dir == "left":
+                    self.bullet_x -= 4
+                elif self.dir == "right":
+                    self.bullet_x +=4
+                elif self.dir == "up":
+                    self.bullet_y -= 4
+                else:
+                    self.bullet_y += 4
+            else:
+                self.bullet_state = "ready"
+                print("wall here!")
+                print(self.bullet_state)
+                break
+            
         
-
         
-
 class Game:
 
     def __init__(self, w, h):
@@ -156,7 +171,7 @@ class Game:
                         self.player.move(3)
 
             if keys[pygame.K_SPACE]:
-                bullet_state = "fire"
+                self.player.bullet_state = "fire"
                 
 
             # Send Network Stuff
@@ -167,8 +182,7 @@ class Game:
             self.player.draw(g)
             self.player2.draw(g)
 
-            if bullet_state == "fire":
-                self.player.bullet(g)
+            self.player.bullet(g)
 
             self.canvas.update()
             
