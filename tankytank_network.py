@@ -33,6 +33,9 @@ def isWall(x, y):
         elif (big_wall[0] <= x <= (big_wall[0] + (big_wall[1] * dim_cube))) and (big_wall[2] <= y <= (big_wall[2] + (big_wall[3] * dim_cube))):
             res = True
             break
+        elif (1 <= x <= 599) == False or (1 <= y <= 799) == False :
+            res = True
+            break
         else:
             continue
     return res
@@ -62,6 +65,21 @@ class Player():
         elif self.dir == "right":
             g.blit(pygame.transform.rotate(self.img, 0), (self.x, self.y))
         
+
+    def update_bullet_position(self):
+        if self.dir == "left":
+            self.bullet_x = self.x - 3
+            self.bullet_y = self.y + 14.5
+        elif self.dir == "right":
+            self.bullet_x = self.x + 35
+            self.bullet_y = self.y + 14.5
+        elif self.dir == "up":
+            self.bullet_x = self.x +14.5
+            self.bullet_y = self.y -3
+        else:
+            self.bullet_x = self.x + 14.5
+            self.bullet_y = self.y +35
+            
 
     def move(self, dirn):
         """
@@ -101,20 +119,25 @@ class Player():
     def bullet(self,g):
         while self.bullet_state == "fire":
             if isWall(self.bullet_x, self.bullet_y) == False:
-                self.shootBullet(self.bullet_x_old, self.bullet_y_old, g)
+                
                 if self.olddir == "left":
-                    self.bullet_x -= 4
+                    self.bullet_x -= self.velocity
                 elif self.olddir == "right":
-                    self.bullet_x +=4
+                    self.bullet_x += self.velocity
                 elif self.olddir == "up":
-                    self.bullet_y -= 4
+                    self.bullet_y -= self.velocity
                 else:
-                    self.bullet_y += 4
+                    self.bullet_y += self.velocity
+                print(self.bullet_x, self.bullet_y)
+                self.shootBullet(self.bullet_x_old, self.bullet_y_old, g)
             else:
-                self.bullet_state = "ready"
+                print(self.bullet_x, self.bullet_y)
                 print("wall here!")
-                print(self.bullet_state)
+                self.bullet_state = "ready"
+                self.update_bullet_position()
+                print(self.bullet_x, self.bullet_y)
                 break
+            print(self.bullet_state)
             
         
         
@@ -135,9 +158,13 @@ class Game:
         clock = pygame.time.Clock()
         run = True
         g = self.canvas.get_canvas()
-        bullet_state = "ready"
+        start_ticks = pygame.time.get_ticks()  # starter tick
         while run:
             clock.tick(60)
+            # arrondir au dixieme près
+            seconds = (pygame.time.get_ticks()-start_ticks) / \
+                1000  # calculate how many seconds
+
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -147,28 +174,28 @@ class Game:
                     run = False
 
             keys = pygame.key.get_pressed()
-
-            if keys[pygame.K_RIGHT] and self.player.x <= self.width - self.player.velocity:
+            
+            if keys[pygame.K_RIGHT] and self.player.x <= self.width - 35:
                 if isWall(self.player.x + 33, self.player.y):
                     continue
                 else:
                     self.player.move(0)
 
-            if keys[pygame.K_LEFT] and self.player.x >= self.player.velocity:
+            if keys[pygame.K_LEFT] and self.player.x > 1:
                 if isWall(self.player.x, self.player.y):
                     continue
                 else:
                     self.player.move(1)
 
             if keys[pygame.K_UP]:
-                if self.player.y >= self.player.velocity:
+                if self.player.y > 1:
                     if isWall(self.player.x, self.player.y):
                         continue
                     else:
                         self.player.move(2)
 
             if keys[pygame.K_DOWN]:
-                if self.player.y <= self.height - self.player.velocity:
+                if self.player.y < self.height - 35:
                     if isWall(self.player.x, self.player.y + 33):
                         continue
                     else:
@@ -179,7 +206,7 @@ class Game:
                     self.player.bullet_state = "fire"
                     # bulletSound = mixer.Sound("one_shot_sound.wav")
                     # bulletSound.play()
-                    self.player.shootBullet(self.player.bullet_x, self.player.bullet_y, g)
+                    # self.player.shootBullet(self.player.bullet_x, self.player.bullet_y, g)
                 
 
             # Send Network Stuff
