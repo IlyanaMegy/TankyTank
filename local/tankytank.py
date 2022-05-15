@@ -1,8 +1,7 @@
-from pygame import mixer
+from pygame import K_ESCAPE, mixer
 import pygame
 from pygame.time import delay
 import os
-score_file = open("score.txt", 'at')
 
 x = 450
 y = 50
@@ -18,19 +17,19 @@ YELLOW = (255, 255, 255)
 
 win = pygame.display.set_mode((600, 450))
 pygame.display.set_caption('Tanky Tanks')
-icon = pygame.image.load('j1_tank.png')
+icon = pygame.image.load('local/j1_tank.png')
 pygame.display.set_icon(icon)
 
 
 # Background
-background = pygame.image.load('map.png')
+background = pygame.image.load('local/map.png')
 margin_x = 0
 margin_y = 0
 
 # Font
-font = pygame.font.Font("8-Bit-Madness.ttf", 50)
-font_sub = pygame.font.Font("8-Bit-Madness.ttf", 35)
-font_text = pygame.font.Font("8-Bit-Madness.ttf", 24)
+font = pygame.font.Font("local/8-Bit-Madness.ttf", 50)
+font_sub = pygame.font.Font("local/8-Bit-Madness.ttf", 35)
+font_text = pygame.font.Font("local/8-Bit-Madness.ttf", 24)
 
 
 def draw_text(text, font, color, surface, x, y):
@@ -114,20 +113,20 @@ def main_menu():
 
 
 def game():
-    score_file = open("score.txt", 'at')
+    score_file = open("highscores.txt", 'at')
     win = pygame.display.set_mode((800, 600))
-    vel = 1.2
+    vel = 1
     run = True
     dim_tank = 33
 
     # Player 1
-    j1_img = pygame.image.load('j1_tank.png').convert_alpha()
+    j1_img = pygame.image.load('local/j1_tank.png').convert_alpha()
     j1_x = 291
     j1_y = 568
     dir_j1 = "right"
 
     # Player 2
-    j2_img = pygame.image.load('j2_tank.png').convert_alpha()
+    j2_img = pygame.image.load('local/j2_tank.png').convert_alpha()
     j2_x = 237
     j2_y = 51
     dir_j2 = "up"
@@ -150,7 +149,7 @@ def game():
     # Score
     score_value_j1 = 0
     score_value_j2 = 0
-    font = pygame.font.Font('8-Bit-Madness.ttf', 32)
+    font = pygame.font.Font('local/8-Bit-Madness.ttf', 32)
     score_x = 650
     score_j1_y = 40
     score_j2_y = 90
@@ -461,16 +460,18 @@ def game():
         win.blit(j2_img, (605, 85))
         show_score(score_x, score_j2_y, score_value_j2)
 
-        print(score_value_j1)
-        print(score_value_j2)
+
 
         if score_value_j1 == 3 or score_value_j2 == 3:
+            score_file = open("highscores.txt", mode='w', encoding='utf-8')
+            score_file.write("\n")
             score_file.write(str(score_value_j1))
-            score_file.write(str("             "))
+            score_file.write(str("               "))
             score_file.write(str(score_value_j2))
-            score_file.write(str("             "))
+            score_file.write(str("               "))
             score_file.write(str(seconds))
-            score_file.write(str('\n'))
+            score_file.write(str(" secondes"))
+            
             # retour a la ligne
             score_file.close()
             end_game()
@@ -495,10 +496,11 @@ def options():
                 if event.button == 1:
                     click = True
 
+        pygame.init()
         mx, my = pygame.mouse.get_pos()
         return_button = pygame.Rect(20, 20, 220, 45)
 
-        clear_score = pygame.Rect(183, 155, 220, 45)
+        clear_score = pygame.Rect(405, 385, 150, 45)
 
         pygame.draw.rect(win, RED, [50, 100, 500, 3])
         pygame.draw.rect(win, RED, [50, 350, 500, 3])
@@ -510,13 +512,21 @@ def options():
         pygame.draw.rect(win, RED, [400, 380, 3, 40])
         pygame.draw.rect(win, RED, [550, 380, 3, 43])
 
-        if clear_score.collidepoint((mx, my)):
-            if click:
-                continue
+        
 
         if return_button.collidepoint((mx, my)):
             if click:
+                print("go home")
                 main_menu()
+
+        if clear_score.collidepoint((mx, my)):
+            if click:
+                file = open("highscores.txt", mode='w', encoding='utf-8')
+                file.write('player 1        player2         time\n')
+                file.close()
+                options()
+                
+
 
         return_mp = font_text.render('< Return main page', True, WHITE)
         clearScore = font_sub.render('CLEAR', True, WHITE)
@@ -524,11 +534,12 @@ def options():
         pygame.draw.rect(win, BLACK, return_button)
 
         draw_text('score', font_sub, RED, win, 250, 110)
+        
 
-        score_file = open("score.txt", 'rt')
+        score_file = open("highscores.txt", 'r')
         score = score_file.read()
-        draw_text(score, font_text, WHITE, win, 180, 150)
-        print(score)
+        draw_text(score, font_text, WHITE, win, 100, 150)
+        
 
         win.blit(return_mp, (20, 20))
         win.blit(clearScore, (430, 390))
@@ -543,12 +554,12 @@ def end_game():
     while True:
 
         win.fill(BLACK)
-        draw_text('GAME OVER', font, RED, win, 180, 40)
+        draw_text('End of the game', font, RED, win, 180, 40)
         draw_text('score', font_sub, RED, win, 200, 100)
 
-        score_file = open("score.txt", 'rt')
+        score_file = open("highscores.txt", 'rt')
         score = score_file.read()
-        draw_text(score, font_text, WHITE, win, 180, 150)
+        draw_text(score, font_text, WHITE, win, 100, 150)
 
         mx, my = pygame.mouse.get_pos()
         newGame_button = pygame.Rect(153, 383, 97, 37)

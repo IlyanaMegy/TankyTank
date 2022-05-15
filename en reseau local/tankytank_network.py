@@ -1,6 +1,7 @@
 from inspect import isawaitable
 import pygame
 from network import Network
+import time
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -49,11 +50,13 @@ class Player():
         self.dir = dir
         self.olddir = dir
         self.img = img
+
         self.bullet_x = 0
         self.bullet_y = 0
         self.bullet_y_old = 0
         self.bullet_x_old = 0
         self.bullet_state = "ready"
+        
 
     def draw(self, g):
         if self.dir == "left":
@@ -114,12 +117,13 @@ class Player():
             self.bullet_y = self.y +35
 
     def shootBullet(self, x, y, g):
+        print("dot")
         pygame.draw.circle(g, RED, (x, y), 3, 10)
-
+        
     def bullet(self,g):
         while self.bullet_state == "fire":
             if isWall(self.bullet_x, self.bullet_y) == False:
-                
+                self.shootBullet(self.bullet_x_old, self.bullet_y_old, g)
                 if self.olddir == "left":
                     self.bullet_x -= self.velocity
                 elif self.olddir == "right":
@@ -129,7 +133,6 @@ class Player():
                 else:
                     self.bullet_y += self.velocity
                 print(self.bullet_x, self.bullet_y)
-                self.shootBullet(self.bullet_x_old, self.bullet_y_old, g)
             else:
                 print(self.bullet_x, self.bullet_y)
                 print("wall here!")
@@ -149,6 +152,7 @@ class Game:
         self.height = h
         self.player = Player(291, 568, "right", pygame.image.load("j1_tank.png"))
         self.player2 = Player(400,180, "up", pygame.image.load("j2_tank.png"))
+        
         self.canvas = Canvas(self.width, self.height, "Tanky Tank")
         self.background = pygame.image.load('map.png')
 
@@ -265,6 +269,7 @@ class Canvas:
 
     @staticmethod
     def update():
+        time.sleep(0.008)
         pygame.display.update()
 
     # def draw_text(self, text, size, x, y):

@@ -2,8 +2,7 @@
 
 ## Présentation :
 
-Ce projet consiste à créer un jeu de Tank sur PC où 2 joueur se connectent à un serveur pour jouer en 1 VS 1.
-Le serveur sera monté sur une Raspberry 3 de sorte que 2 joueurs puissent jouer en local.
+Ce projet consiste à créer un jeu de Tank sur PC où 2 joueur jouent en 1 VS 1 sur un même PC.
 
 ## Fonctionnalités :
 **Le programme comporte 4 écrans :**
@@ -22,14 +21,14 @@ Les deux joueurs possèdent :
  - un délai de tir 
 
 **Des scores composés de :**
- - le score
- - le pseudo du gagnant
+ - le score du joueur 1
+ - le score du joueur 2
  - le temps enregistré à la fin du jeu
 
 **Contrôleurs :**
-Clavier -> boutons UP,DOWN,RIGHT,LEFT,SPACE
-ou
-une manette PC -> boutons UP,DOWN,RIGHT,LEFT,A
+Clavier -> boutons :
+Joueur 1 : UP,DOWN,RIGHT,LEFT,SPACE
+Joueur 2 : Z(up),Q(left),S(down),D(right),A(shoot)
 
 **Déroulement d’une partie :**  
  - les deux joueurs apparaissent de part et d’autre de l’écran.
@@ -38,16 +37,6 @@ une manette PC -> boutons UP,DOWN,RIGHT,LEFT,A
  - un des boutons permet au joueur de tirer un projectile. 
  - un Joueur perd un point de vie quand un projectile le touche.
 
-**Bonus et évènement :**
-Les bonus apparaissent sous forme d'objets n'importe où sur la map et de façon aléatoire dans le temps. Les bonus sont des compétences que le joueur peut utiliser à n'importe quel moment du jeu et ont une durée limitée lorsque déclenchés. Les bonus ne peuvent pas être cumulés.
-
-1/ Les bonus de déplacement :
-- Bonus d'accélération; le tank avance plus vite 
-- Bonus fantôme; le tank peut traverser les murs 
-
-2/ Les bonus de tirs :
-- Bonus mitraillette; le joueur tire des rafales 
-- Bonus bombe; le joueur des balles qui traversent les murs
 
 **Fin de partie :**
  - la partie se termine quand un joueur n’a plus de points de vie.
